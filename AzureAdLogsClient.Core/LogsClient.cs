@@ -38,11 +38,12 @@ namespace AzureAdLogsClient.Core
 
         public async Task<List<SignIn>> GetAuditLogs()
         {
-            var lastDay = new Date(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+            var lastDay = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+            lastDay = lastDay.AddDays(-1);
 
             var auditLogs = await _graphClient.AuditLogs.SignIns
                 .Request()
-                .Filter($"createdDateTime gt {lastDay}") // filter date
+                // .Filter($"createdDateTime gt {lastDay}") // filter date
                 .GetAsync();
 
             return auditLogs.CurrentPage.ToList();

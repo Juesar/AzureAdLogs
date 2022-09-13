@@ -15,8 +15,12 @@ namespace AzureAdLogsClient
             var host = CreateHostBuilder(args).Build();
 
             var logsClient = host.Services.GetService<ILogsClient>();
+            var csvHelper = host.Services.GetService<ICsvHelper>();
+            var fileHelper = host.Services.GetService<IFileHelper>();
 
             var data = await logsClient.GetAuditLogs();
+            var csvText = csvHelper.ObjectToCvsText(data);
+            fileHelper.StoreFile(@"D:\test.csv", csvText);
 
             Console.ReadLine();
         }
@@ -31,6 +35,8 @@ namespace AzureAdLogsClient
                 .ConfigureServices((context, services) =>
                 {
                     services.AddTransient<ILogsClient, LogsClient>();
+                    services.AddTransient<ICsvHelper, CsvHelper>();
+                    services.AddTransient<IFileHelper, FileHelper>();
                 });
 
             return hostBuilder;
