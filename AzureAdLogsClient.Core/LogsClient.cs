@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Azure.Identity;
 using Microsoft.Extensions.Configuration;
@@ -8,7 +10,7 @@ namespace AzureAdLogsClient.Core
 {
     public interface ILogsClient
     {
-        Task<IAuditLogRootSignInsCollectionPage?> GetAuditLogs();
+        Task<List<SignIn>> GetAuditLogs();
     }
 
     public class LogsClient: ILogsClient
@@ -34,14 +36,16 @@ namespace AzureAdLogsClient.Core
             _graphClient = new GraphServiceClient(deviceCodeCredential, scopes);
         }
 
-        public async Task<IAuditLogRootSignInsCollectionPage?> GetAuditLogs()
+        public async Task<List<SignIn>> GetAuditLogs()
         {
             var lastDay = new Date(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+
             var auditLogs = await _graphClient.AuditLogs.SignIns
                 .Request()
                 .Filter($"createdDateTime gt {lastDay}") // filter date
                 .GetAsync();
-            return auditLogs;
+
+            return auditLogs.CurrentPage.ToList();
         }
     }
 }
